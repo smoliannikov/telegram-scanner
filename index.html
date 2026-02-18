@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Barcode Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #reader {
+            width: 100%;
+            max-width: 420px;
+            margin: 20px auto;
+        }
+        .hint {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📷 Сканирование штрихкода 2.0</h2>
+<div class="hint">Наведи камеру на код</div>
+<div id="reader"></div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let lastScan = 0;
+const html5QrCode = new Html5Qrcode("reader");
+
+const config = {
+    fps: 10,
+    qrbox: { width: 280, height: 160 },
+    formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.QR_CODE
+    ]
+};
+
+function onScan(decodedText) {
+    const now = Date.now();
+    if (now - lastScan < 1500) return;
+    lastScan = now;
+
+    if (navigator.vibrate) navigator.vibrate(100);
+
+    // Отправляем данные сразу, без ожидания stop
+    tg.sendData(JSON.stringify({ barcode: decodedText }));
+
+    // Останавливаем сканер
+    html5QrCode.stop().catch(() => {});
+
+    // Закрываем WebApp через 200ms
+    setTimeout(() => tg.close(), 200);
+}
+
+// Запуск сканера
+html5QrCode.start({ facingMode: "environment" }, config, onScan);
+</script>
+
+
+</body>
+</html>
