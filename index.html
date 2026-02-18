@@ -32,6 +32,9 @@
 <div id="reader"></div>
 
 <script>
+console.log("Telegram object:", window.Telegram);
+console.log("WebApp object:", window.Telegram?.WebApp);
+alert("WebApp init");
 const tg = window.Telegram.WebApp;
 tg.expand();
 
@@ -50,20 +53,18 @@ const config = {
 };
 
 function onScan(decodedText) {
-    const now = Date.now();
-    if (now - lastScan < 1500) return;
-    lastScan = now;
+    alert("SCANNED: " + decodedText);
 
-    if (navigator.vibrate) navigator.vibrate(100);
+    console.log("About to send:", decodedText);
+    console.log("Telegram object:", window.Telegram);
+    console.log("WebApp object:", tg);
 
-    // Отправляем данные сразу, без ожидания stop
     tg.sendData(JSON.stringify({ barcode: decodedText }));
 
-    // Останавливаем сканер
-    html5QrCode.stop().catch(() => {});
-
-    // Закрываем WebApp через 200ms
-    setTimeout(() => tg.close(), 200);
+    setTimeout(() => {
+        alert("Closing");
+        tg.close();
+    }, 1000);
 }
 
 // Запуск сканера
@@ -73,3 +74,4 @@ html5QrCode.start({ facingMode: "environment" }, config, onScan);
 
 </body>
 </html>
+
