@@ -32,13 +32,11 @@
 <div id="reader"></div>
 
 <script>
-console.log("Telegram object:", window.Telegram);
-console.log("WebApp object:", window.Telegram?.WebApp);
-alert("WebApp init");
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let lastScan = 0;
+let scanned = false;
+
 const html5QrCode = new Html5Qrcode("reader");
 
 const config = {
@@ -53,19 +51,15 @@ const config = {
 };
 
 function onScan(decodedText) {
-    alert("SCANNED: " + decodedText);
-
-    console.log("About to send:", decodedText);
-    console.log("Telegram object:", window.Telegram);
-    console.log("WebApp object:", tg);
+    if (scanned) return;
+    scanned = true;
 
     tg.sendData(JSON.stringify({ barcode: decodedText }));
-
-    setTimeout(() => {
-        alert("Closing");
-        tg.close();
-    }, 1000);
+    tg.close();
 }
+
+html5QrCode.start({ facingMode: "environment" }, config, onScan);
+</script>
 
 // Запуск сканера
 html5QrCode.start({ facingMode: "environment" }, config, onScan);
@@ -74,4 +68,5 @@ html5QrCode.start({ facingMode: "environment" }, config, onScan);
 
 </body>
 </html>
+
 
